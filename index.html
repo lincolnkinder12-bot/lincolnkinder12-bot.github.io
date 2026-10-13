@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101116">
+<title>Habitual — Daily Habit Tracker</title>
+<style>
+:root{color-scheme:dark;--bg:#101116;--panel:#191a22;--panel2:#20212b;--border:#30313d;--text:#f4f4f8;--muted:#a0a1b2;--accent:#a78bfa;--accent2:#7c5ce7;--green:#5ee0ad;--danger:#ff8291}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 15% 0%,#24203a 0,transparent 38%),var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+button,input{font:inherit}
+button{cursor:pointer}
+.wrap{max-width:980px;margin:auto;padding:36px 22px 56px}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:34px}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,#c4b5fd,#7c5ce7);display:grid;place-items:center;color:#151222;font-size:24px;font-weight:900}
+h1{font-size:21px;line-height:1.2;margin:0;letter-spacing:-.5px}
+.tagline{font-size:13px;color:var(--muted);margin-top:4px}
+.date-pill{border:1px solid var(--border);background:#191a22;color:#d6d3e7;padding:9px 13px;border-radius:999px;font-size:13px}
+.hero{display:grid;grid-template-columns:1.3fr .7fr;gap:18px;margin-bottom:20px}
+.card{background:rgba(25,26,34,.92);border:1px solid var(--border);border-radius:22px;padding:24px;box-shadow:0 14px 45px #00000012}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--accent);font-weight:750}
+h2{margin:8px 0 7px;font-size:clamp(25px,4vw,36px);line-height:1.14;letter-spacing:-1px}
+.sub{color:var(--muted);margin:0}
+.progress-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:18px 0 9px;font-size:13px;color:#d4d2e2}
+.progress-track{height:10px;background:#30303c;border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;width:0;background:linear-gradient(90deg,#8b72f5,#c4b5fd);border-radius:99px;transition:width .25s}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{padding:19px;border-radius:17px;background:var(--panel2);border:1px solid #30313d}
+.stat-num{font-size:29px;font-weight:800;letter-spacing:-1px}
+.stat-label{font-size:12px;color:var(--muted);margin-top:2px}
+.section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:28px 0 14px}
+.section-head h3{margin:0;font-size:18px}
+.count{font-size:12px;color:var(--muted);background:var(--panel2);padding:5px 9px;border-radius:99px}
+.add-row{display:flex;gap:10px;margin-bottom:15px}
+input[type=text]{min-width:0;flex:1;background:#191a22;border:1px solid var(--border);color:var(--text);padding:13px 15px;border-radius:13px;outline:none}
+input[type=text]:focus{border-color:var(--accent);box-shadow:0 0 0 3px #a78bfa22}
+.btn{border:0;border-radius:13px;padding:12px 16px;font-weight:750;transition:transform .12s,filter .12s}
+.btn:active{transform:scale(.98)}
+.primary{background:var(--accent);color:#191326}
+.secondary{background:var(--panel2);border:1px solid var(--border);color:var(--text)}
+.habit-list{display:grid;gap:10px}
+.habit{display:flex;align-items:center;gap:13px;padding:15px 16px;border:1px solid var(--border);background:var(--panel);border-radius:16px;transition:border-color .2s,background .2s}
+.habit.done{border-color:#316e5b;background:#172720}
+.check{appearance:none;flex:0 0 25px;width:25px;height:25px;border:2px solid #646579;border-radius:8px;display:grid;place-items:center;margin:0;cursor:pointer}
+.check:checked{background:var(--green);border-color:var(--green)}
+.check:checked:after{content:"✓";font-size:17px;font-weight:900;color:#10231c}
+.habit-name{flex:1;min-width:0;overflow-wrap:anywhere}
+.habit.done .habit-name{color:#9fceb9;text-decoration:line-through;text-decoration-color:#5b9b83}
+.habit-icon{font-size:21px;width:30px;text-align:center}
+.delete{border:0;background:transparent;color:#77798c;font-size:19px;padding:5px 8px;border-radius:9px}
+.delete:hover{background:#3a2028;color:var(--danger)}
+.empty{border:1px dashed #454653;border-radius:16px;padding:32px 18px;text-align:center;color:var(--muted)}
+.empty strong{display:block;color:var(--text);margin-bottom:4px}
+.footer{color:#77798c;font-size:12px;text-align:center;margin-top:30px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#272936;border:1px solid #444557;padding:10px 16px;border-radius:12px;box-shadow:0 8px 30px #0008;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.show{opacity:1}
+@media(max-width:650px){.wrap{padding:22px 14px 38px}header{align-items:flex-start;margin-bottom:24px}.hero{grid-template-columns:1fr}.card{padding:20px}.date-pill{font-size:11px}.add-row{flex-wrap:wrap}.add-row input{flex-basis:100%}.add-row .btn{flex:1}.section-head{margin-top:24px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true">✓</div>
+      <div><h1>Habitual</h1><div class="tagline">Little steps. Lasting change.</div></div>
+    </div>
+    <div class="date-pill" id="dateLabel">Today</div>
+  </header>
+
+  <section class="hero">
+    <div class="card">
+      <div class="eyebrow">Your daily reset</div>
+      <h2>Show up for yourself.</h2>
+      <p class="sub">Build consistency, one small habit at a time.</p>
+      <div class="progress-head"><span>Today's progress</span><strong id="progressText">0 of 0 · 0%</strong></div>
+      <div class="progress-track" role="progressbar" aria-label="Daily habit progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Your snapshot</div>
+      <div class="stats" style="margin-top:17px">
+        <div class="stat"><div class="stat-num" id="doneStat">0</div><div class="stat-label">Done today</div></div>
+        <div class="stat"><div class="stat-num" id="totalStat">0</div><div class="stat-label">Daily habits</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-head"><h3>Today's habits</h3><span class="count" id="habitCount">0 habits</span></div>
+  <form class="add-row" id="addForm">
+    <input id="habitInput" type="text" maxlength="100" placeholder="Add a habit, e.g. Read for 10 minutes" aria-label="New habit name" required>
+    <button class="btn primary" type="submit">＋ Add habit</button>
+  </form>
+  <div class="habit-list" id="habitList"></div>
+  <div class="footer">Your habits are saved in this browser on this device. Be patient with yourself — progress over perfection.</div>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(() => {
+  const STORAGE_KEY = "habitual-tracker-v1";
+  const defaultHabits = [
+    {id: makeId(), name:"Drink water", checks:{}},
+    {id: makeId(), name:"Move my body", checks:{}},
+    {id: makeId(), name:"Read for 10 minutes", checks:{}},
+    {id: makeId(), name:"Tidy up for 5 minutes", checks:{}}
+  ];
+  function makeId(){ return Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,9); }
+  function localDateKey(date=new Date()){
+    return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+  }
+  function load(){
+    try{
+      const raw=localStorage.getItem(STORAGE_KEY);
+      if(!raw) return {habits:defaultHabits};
+      const parsed=JSON.parse(raw);
+      if(!parsed || !Array.isArray(parsed.habits)) throw new Error("Invalid saved data");
+      return parsed;
+    }catch(e){ return {habits:defaultHabits}; }
+  }
+  let state=load();
+  const $=id=>document.getElementById(id);
+  const today=localDateKey();
+  $("dateLabel").textContent=new Intl.DateTimeFormat(undefined,{weekday:"short",month:"short",day:"numeric"}).format(new Date());
+  function save(){
+    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}
+    catch(e){showToast("Could not save. Your browser storage may be full or disabled.");}
+  }
+  let toastTimer;
+  function showToast(message){
+    const el=$("toast");el.textContent=message;el.classList.add("show");
+    clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),2400);
+  }
+  function render(){
+    const list=$("habitList");list.replaceChildren();
+    let done=0;
+    state.habits.forEach(habit=>{
+      const isDone=Boolean(habit.checks && habit.checks[today]);
+      if(isDone) done++;
+      const row=document.createElement("div");row.className="habit"+(isDone?" done":"");
+      const check=document.createElement("input");check.type="checkbox";check.className="check";check.checked=isDone;
+      check.setAttribute("aria-label","Mark "+habit.name+" complete");
+      check.addEventListener("change",()=>{
+        habit.checks=habit.checks||{};
+        if(check.checked) habit.checks[today]=true; else delete habit.checks[today];
+        save();render();
+      });
+      const icon=document.createElement("span");icon.className="habit-icon";icon.setAttribute("aria-hidden","true");icon.textContent=isDone?"🌱":"○";
+      const name=document.createElement("span");name.className="habit-name";name.textContent=habit.name;
+      const del=document.createElement("button");del.className="delete";del.type="button";del.textContent="×";
+      del.setAttribute("aria-label","Delete habit "+habit.name);
+      del.title="Delete habit";
+      del.addEventListener("click",()=>{
+        if(confirm(`Delete "${habit.name}"? Its saved checkmarks for past days will also be removed.`)){
+          state.habits=state.habits.filter(h=>h.id!==habit.id);save();render();showToast("Habit deleted");
+        }
+      });
+      row.append(check,icon,name,del);list.append(row);
+    });
+    if(state.habits.length===0){
+      const empty=document.createElement("div");empty.className="empty";
+      const strong=document.createElement("strong");strong.textContent="A fresh start";
+      const msg=document.createElement("span");msg.textContent="Add a habit above to begin your daily checklist.";
+      empty.append(strong,msg);list.append(empty);
+    }
+    const total=state.habits.length,percent=total?Math.round(done/total*100):0;
+    $("progressText").textContent=`${done} of ${total} · ${percent}%`;
+    $("progressFill").style.width=percent+"%";
+    $("progressBar").setAttribute("aria-valuenow",String(percent));
+    $("doneStat").textContent=done;$("totalStat").textContent=total;
+    $("habitCount").textContent=`${total} habit${total===1?"":"s"}`;
+    if(total>0&&done===total) $("progressText").textContent=`All done · ${percent}% ✨`;
+  }
+  $("addForm").addEventListener("submit",e=>{
+    e.preventDefault();const input=$("habitInput");const name=input.value.trim();
+    if(!name)return;
+    if(state.habits.some(h=>h.name.toLocaleLowerCase()===name.toLocaleLowerCase())){
+      showToast("That habit is already on your list.");return;
+    }
+    state.habits.push({id:makeId(),name,checks:{}});save();render();input.value="";input.focus();showToast("Habit added");
+  });
+  render();
+})();
+</script>
+</body>
+</html>
